@@ -1,0 +1,701 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+#按照題目生成兩個時間  poisson process lambda=2 到達時間點  服務時間長 exp=1
+import random
+import math
+import numpy as np
+from scipy.stats import sem
+a_time=[]
+s_time=[]
+t=0
+I=0
+
+for i in range(10):
+    u=random.uniform(0,1)
+    t=t-(0.5*math.log(u))
+    a_time.append(t)
+    s_time.append(-math.log(u))
+    
+
+
+# In[2]:
+
+
+a_time #生成10人到達時間點 poisson process lambda=2
+
+
+# In[3]:
+
+
+s_time #生成10人服務時間長 exp=1
+
+
+# In[4]:
+
+
+#第1人不需要等待 ， 花費時間T=服務時間
+T=[]
+T.append(s_time[0])
+T
+
+
+# In[5]:
+
+
+#第一人結束時間點，等於第一人到達時間+第一人服務時間
+F=[]
+F.append(s_time[0]+a_time[0])
+F
+
+
+# In[6]:
+
+
+#計算每個人的結束時間點，若到達時，前面的人還沒做完，必須等前面做完，Fi=Fi-1+si。 前面的人已做完，可直接開始。 Fi=ai+si
+
+for i in range(1,10):
+    if a_time[i]<=F[i-1]:
+        time=F[i-1]+s_time[i]
+        F.append(time)
+    else:
+        time=s_time[i]+a_time[i]
+        F.append(time)
+
+
+# In[7]:
+
+
+F
+
+
+# In[8]:
+
+
+#每個人花費時間T=完成時間點-到達時間點
+import numpy as np
+F=np.array(F)
+a_time=np.array(a_time)
+T=F-a_time
+
+
+# In[9]:
+
+
+T #得出T1.....T10
+
+
+# In[10]:
+
+
+#計算i到達時在系統內人數，比較arrival time跟前面人的f time ，若i到達時，前面[0:i]人還沒做完 ，回傳true 並count true。
+d=[0]
+for i in range(1,10):
+    b=a_time[i]<F[0:i]
+    num=(b == True).sum()
+    d.append(num)
+print(d)
+
+
+# In[11]:
+
+
+#-------------------------------------------------------------------------
+
+
+# In[12]:
+
+
+#將前面過程函數化，方便模擬。
+def get_T(x):
+    a_time=[]
+    s_time=[]
+    a_time2=[]
+    s_time2=[]
+    t=0
+    t2=0
+    for i in range(10):
+        u=random.uniform(0,1)
+        u2=1-u #antithetic  改用1-u生成
+        t=t-(0.5*math.log(u))
+        a_time.append(t)
+        s_time.append(-math.log(u))
+        t2=t2-(0.5*math.log(u2))
+        a_time2.append(t2)
+        s_time2.append(-math.log(u2))
+        
+        
+    T=[]
+    T.append(s_time[0])
+    F=[]
+    F.append(s_time[0]+a_time[0]) 
+    
+    for i in range(1,10):
+        if a_time[i]<=F[i-1]:
+            time=F[i-1]+s_time[i]
+            F.append(time)
+        else:
+            time=s_time[i]+a_time[i]
+            F.append(time)
+    
+    F=np.array(F)
+    a_time=np.array(a_time)
+    T=F-a_time
+    
+    #antithetic  
+    T2=[]
+    T2.append(s_time2[0])
+    F2=[]
+    F2.append(s_time2[0]+a_time2[0]) 
+    
+    for i in range(1,10):
+        if a_time2[i]<=F2[i-1]:
+            time2=F2[i-1]+s_time2[i]
+            F2.append(time2)
+        else:
+            time2=s_time2[i]+a_time2[i]
+            F2.append(time2)
+    
+    F2=np.array(F2)
+    a_time2=np.array(a_time2)
+    T2=F2-a_time2
+    
+    
+    
+    #回傳每次模擬的sum s
+    s=sum(s_time)
+    
+    #回傳每次模擬的s-I 。I間格時間，等於最後一人到達-第一人到達
+    I=a_time[-1]-a_time[0]
+    y=s-I
+    
+    
+    #compute d
+    d=[0] #第一人前方沒有人，
+    for i in range(1,10):
+        b=a_time[i]<F[0:i]
+        num=(b == True).sum()
+        d.append(num)
+    
+    
+    
+    return T,s,y,d,T2
+    
+
+
+# In[13]:
+
+
+get_T(1)
+
+
+# In[14]:
+
+
+sim=[]
+for i in range(100):
+    sim.append(get_T(i))
+
+
+# In[15]:
+
+
+sim[0]
+
+
+# In[16]:
+
+
+# compute raw t1+....t10
+
+
+# In[17]:
+
+
+T=[]
+for i in range(100):
+    T.append(sim[i][0])
+
+
+# In[18]:
+
+
+result=[]
+
+for i in range (len(T)):
+    a=np.sum(T[i])
+    result.append(a)
+
+
+# In[ ]:
+
+
+
+
+
+# In[19]:
+
+
+#raw result
+E_X =np.sum(result)/100
+
+R_var=np.var(result)
+
+print(E_X,R_var)
+
+
+# In[20]:
+
+
+#antithetic 
+T2=[]
+for i in range(100):
+    T2.append(sim[i][4])
+
+
+# In[21]:
+
+
+result2=[]
+
+for i in range (len(T2)):
+    a=np.sum(T2[i])
+    result2.append(a)
+
+
+# In[ ]:
+
+
+
+
+
+# In[22]:
+
+
+#(x+y)/2  x=用u生成的t1+...t10  y=用1-u生成的t1+...t10
+anti=(np.array(result)+np.array(result2))/2
+
+
+# In[23]:
+
+
+#antithetic result  var((x+y)/2)
+E_X =np.sum(anti)/100
+
+R_var=np.var(anti)
+
+print(E_X,R_var)
+
+
+# In[24]:
+
+
+# Q3 先取出100個sums
+sums=[]
+for i in range(100):
+    sums.append(sim[i][1])
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[25]:
+
+
+#求平均
+usums=sum(sums)/100
+
+
+# In[ ]:
+
+
+
+
+
+# In[26]:
+
+
+#compute c = cov(x,y)/var(y)
+
+
+# In[27]:
+
+
+c=-np.cov(result,sums)[0][1]/np.cov(result,sums)[1][1]
+
+print(c)
+
+
+# In[28]:
+
+
+#new = x-c*(y-uy)    ，x=t1+...t10 , y=sums  (control variate)
+new=[]
+for i in range(100):
+    X=result[i]+c*(sums[i]-usums)
+    new.append(X)
+
+
+# In[ ]:
+
+
+
+
+
+# In[29]:
+
+
+#Q3 result 
+E_X =np.sum(new)/100
+
+var2=np.var(new)
+
+print(E_X,var2)
+
+
+# In[30]:
+
+
+# Q4 取出100個 S-I
+IS=[]
+for i in range(100):
+    IS.append(sim[i][2])
+
+
+# In[ ]:
+
+
+
+
+
+# In[31]:
+
+
+#求平均
+Isum=sum(IS)/100
+
+
+# In[32]:
+
+
+#compute c
+c=-np.cov(result,IS)[0][1]/np.cov(result,IS)[1][1]
+print(c)
+
+
+# In[33]:
+
+
+#算出x-c*(y-uy)    ，x=t1+...t10 , y=i-s (control variate)
+new=[]
+for i in range(100):
+    X=result[i]+c*(IS[i]-Isum)
+    new.append(X)
+
+
+# In[34]:
+
+
+#Q4 result
+E_X =np.sum(new)/100
+
+var2=np.var(new)
+
+print(E_X,var2)
+
+
+# In[ ]:
+
+
+
+
+
+# In[35]:
+
+
+#Q5 conditional expectation 
+
+
+# In[36]:
+
+
+#取出 ni
+n=[]
+for i in range(100):
+    n.append(sim[i][3])
+
+
+# In[37]:
+
+
+y=[]
+for i in range (100):
+    a=np.sum(n[i])
+    y.append(a)
+
+
+# In[38]:
+
+
+#用簡單回歸模型計算，E(x|y)
+import numpy as np
+from sklearn.linear_model import LinearRegression
+X = np.array(result).reshape((-1, 1))
+Y = np.array(y).reshape((-1, 1))
+
+LR = LinearRegression()
+LR.fit(Y,X)
+a = LR.coef_
+b = LR.intercept_
+
+
+# In[39]:
+
+
+#E(X|Y)=a+by
+new=b+(a*y)
+print(new)
+
+
+# In[51]:
+
+
+#Q5結果
+E_X =np.sum(new)/100
+
+var2=np.var(new)
+
+print(E_X,var2)
+
+
+# In[ ]:
+
+
+
+
+
+# In[40]:
+
+
+#=============================================================================================
+
+
+# In[41]:
+
+
+#按照題目生成 n(1,1) ，並連加直到>5 or <-5
+import numpy as np
+def getS():    
+    a=[]
+    while True:
+        X=np.random.normal(1,1)
+        a.append(X)
+        if sum(a)>5 or sum(a)<-5:
+            return sum(a)
+            break 
+
+
+# In[42]:
+
+
+getS()
+
+
+# In[43]:
+
+
+#模擬1000000次
+list=[]
+for i in range(1000000):
+    list.append(getS())
+
+
+# In[ ]:
+
+
+
+
+
+# In[44]:
+
+
+#compute p ，用蒙地卡羅法，1000000 僅出現13次 <-5 。機率趨近於0
+for i in range(1000000):
+    if list[i]<-5:
+        list[i]=1
+    else:
+        list[i]=0
+
+        
+print(sum(list))
+p=sum(list)/1000000
+print(p)
+
+
+# In[45]:
+
+
+#改從N(-1,1)生成
+def getS():    
+    a=[]
+    while True:
+        X=np.random.normal(-1,1)
+        a.append(X)
+        if sum(a)>5 or sum(a)<-5:
+            return sum(a)
+            break 
+
+
+# In[46]:
+
+
+#P(SN<-5) 機率大幅度提高
+list=[]
+for i in range(1000000):
+    list.append(getS())
+
+
+# In[ ]:
+
+
+
+
+
+# In[47]:
+
+
+#建立 I==1 when s<-5        I==0 ow
+b=[]
+for i in range(1000000):
+    if list[i]<-5:
+        b.append(1)
+    else:
+        b.append(0)
+        
+        
+
+
+# In[48]:
+
+
+#變得好取得後，要重新修正機率，用加權方式。經過課本的公式， p(sn<-5)==I * e**(2sn)
+list=np.array(list)
+b=np.array(b)
+c=(np.exp(2*list))*b
+
+
+# In[49]:
+
+
+c
+
+
+# In[50]:
+
+
+#計算 p(sn<-5) ，結果也是趨近0
+P=sum(c)/1000000
+print(P)
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
