@@ -9,7 +9,6 @@ The course is based on the **2013 edition of the book _Simulation_** by Sheldon 
 This repository includes:
 
 - **10 homework assignments with course notes**
-- **2 course projects**
 
 ## Topics
 
@@ -39,6 +38,4 @@ statistic-simulation/
 ├── hw8/
 ├── hw9/
 ├── hw10/
-├── project1/
-├── project2/
 └── README.md
