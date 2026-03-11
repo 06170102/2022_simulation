@@ -1,6 +1,6 @@
 #2022 Simulation course
 
-This repository contains solutions for the **Big Data course**.
+This repository contains solutions for the **Simulation course**.
 
 The course is based on the **2013 edition of the book _Simulation_** by Sheldon M Ross, and the topics covered in this repository follow the chapters discussed in class.
 
@@ -8,7 +8,7 @@ The course is based on the **2013 edition of the book _Simulation_** by Sheldon 
 
 This repository includes:
 
-- **10 homework assignments with course notes**
+- **homework assignments with course notes**
 
 ## Topics
 
@@ -21,21 +21,11 @@ The course covers chapter-based topics from the textbook, including:
 - statistical analysis of simulated data
 - simulation modeling and applications
 
-## Repository Purpose
+## tools
 
-This GitHub repository serves as a collection of solutions to the assignments and projects completed in the course.
+- numpy
+- pandas
+- matplotlib
 
-## Repository Structure
 
-statistic-simulation/
-├── hw1/
-├── hw2/
-├── hw3/
-├── hw4/
-├── hw5/
-├── hw6/
-├── hw7/
-├── hw8/
-├── hw9/
-├── hw10/
 └── README.md
