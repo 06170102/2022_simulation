@@ -1,6 +1,6 @@
 #2022 Simulation course
 
-This repository contains solutions for the **Big Data course** offered by the **Institute of Statistics, NYCU**.
+This repository contains solutions for the **Big Data course**.
 
 The course is based on the **2013 edition of the book _Simulation_** by Sheldon M Ross, and the topics covered in this repository follow the chapters discussed in class.
 
