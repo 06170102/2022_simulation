@@ -28,4 +28,3 @@ The course covers chapter-based topics from the textbook, including:
 - matplotlib
 
 
-└── README.md
